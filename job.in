@@ -51,7 +51,7 @@ export MARKER_FLAG="-m"
 for N in 128 512 2048 # loop over problem sizes
    do
 
-#   for B in 4 16 64  # uncomment these two lines
+#   for B in 4 16  # uncomment these two lines
 #      do            # to also iterate over block sizes for the blocked version
 
       for t in 1 4 16 64  # loop over concurrency level
