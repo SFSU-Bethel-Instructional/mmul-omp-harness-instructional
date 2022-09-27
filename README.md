@@ -26,6 +26,16 @@ module:
 * module load likwid/5.2.0   # on cori  
 * module load likwid-5.2.0   # on the VM
 
+Cori@NERSC update 9/27/2022:
+
+Prior to running the module load command, please manually modify your MODULEPATH environment variable as follows
+
+   bash users:
+	% export MODULEPATH=/project/projectdirs/m3930/modulefiles:$MODULEPATH
+
+	 csh users
+	% setenv MODULEPATH /project/projectdirs/m3930/modulefiles:$MODULEPATH
+
 
 # Build instructions - general
 
@@ -73,36 +83,6 @@ This version of benchmark.cpp is modified to accept two command line arguments:
 This change was made to make it possible to control these parameters from the command
 line, which is handy for scripting up the test suite.
 
-# Changes to benchmark.cpp from HW2
-
-This version of benchmark.cpp is modified to accept two command line arguments:
-
-* -N nn   # sets the problem size  
-* -B bb   # sets the block size
-
-This change was made to make it possible to control these parameters from the command
-line, which is handy for scripting up the test suite.
-
-# Changes to benchmark.cpp from HW2
-
-This version of benchmark.cpp is modified to accept two command line arguments:
-
-* -N nn   # sets the problem size  
-* -B bb   # sets the block size
-
-This change was made to make it possible to control these parameters from the command
-line, which is handy for scripting up the test suite.
-
-# Changes to benchmark.cpp from HW2
-
-This version of benchmark.cpp is modified to accept two command line arguments:
-
-* -N nn   # sets the problem size  
-* -B bb   # sets the block size
-
-This change was made to make it possible to control these parameters from the command
-line, which is handy for scripting up the test suite.
-
 # Running the benchmarks
 
 When you run cmake, it generates three bash script files that you may use on Cori to
@@ -131,5 +111,19 @@ running cmake, look inside job-blas for more details.
 * job-blocked-openmp: requires 2 modifications to enable the loop over block sizes and
 to pass the block size argument in to the benckmark-blocked-omp program. After running
 cmake, look insize job-blocked-omp for more details.
+
+## Requesting a KNL interactive node for doing runs
+
+An "extra step" is required for setting up the kernel environment for running LIKWID-enabled codes to collect hardware performance counters.
+
+Modify your salloc command when requesting a KNL node by adding "--perf=likwid" as follows:
+
+salloc --nodes=1 --qos=interactive --time=01:00:00 --constraint=knl --account=m3930 --perf=likwid
+
+There may be a similar option for use with sbatch commands, but documentation is elusive.
+Suggest doing all interactive runs.
+
+You may request and use an interactive node for up to 4 hours at a time.
+
 
 #eof
