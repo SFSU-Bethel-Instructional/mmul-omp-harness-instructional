@@ -16,45 +16,47 @@ to remind you of this fact. See dgemm-blas.cpp for example usage of the per-thre
 LIKWID Marker API, which is valid even if running a serial code.
 
 Note that cmake needs to be able to find the CBLAS package. For CSC 746 Fall 2021,
-this condition is true on Cori@NERSC and on the class VM. It is also true for some
-other platforms, but you are on your own if using a platform other than Cori@NERSC
+this condition is true on Perlmutter@NERSC and on the class VM. It is also true for some
+other platforms, but you are on your own if using a platform other than Perlmutter@NERSC
 or the class VM.
 
-Cmake also needs to be able to find LIKWID. This condition is satisfied on Cori when
-you first load the likwid/5.2.0 module, or on the VM when you load the likwid-5.2.0
-module:  
-* module load likwid/5.2.0   # on cori  
-* module load likwid-5.2.0   # on the VM
+Cmake also needs to be able to find LIKWID.  
+This condition is satisfied on  the VM when you load the likwid-5.2.0 module:    
+```
+module load likwid-5.2.0
+```  
 
-Cori@NERSC update 9/27/2022:
+To load the LIKWID module on Perlmutter, you need to run the below commands (please refer to build instructions section before running these commands):
+```
+module load e4s/22.05
+spack env activate cuda
+spack load likwid
+```
 
-Prior to running the module load command, please manually modify your MODULEPATH environment variable as follows
-
-   bash users:
-	% export MODULEPATH=/project/projectdirs/m3930/modulefiles:$MODULEPATH
-
-	 csh users
-	% setenv MODULEPATH /project/projectdirs/m3930/modulefiles:$MODULEPATH
-
-
+<br></br>
 # Build instructions - general
 
 After downloading, cd into the main source directly, then:
+```
+mkdir build
+cd build  
+cmake ../ -Wno-dev
+make
+```
 
-% mkdir build  
-% cd build  
-% cmake ../  -Wno-dev
+When building on Perlmutter, make sure you are on a CPU node when doing the compilation. The simplest way to do this is
+grab an interactive KNL node:  
+`salloc --nodes 1 --qos interactive --time 01:00:00 --constraint cpu --account m3930`
 
-When building on Cori, make sure you are on a KNL node when doing the compilation. The
-Cori login nodes are *not* KNL nodes, the Cori login nodes have Intel Xeon E5-2698
-processors, not the Intel Xeon Phi 7250 processors.  The simplest way to do this is
-grab an interactive KNL node:
-salloc --nodes 1 --qos interactive --time 01:00:00 --constraint knl --account m3930
+Before building your code on the CPU node, make sure to load the LIKWID module as mentioned in the previous section. Below is a quick overview of all the steps you need to take to build your code:  
+* Grab a CPU node using the `salloc` command above
+* Load the LIKWID module using the commands from the previous section
+* Build your code using the cmake and make commands mentioned at the start of this section
 
 # Platforms
 
 Due to the dependency on LIKWID and LIKWID's dependency on the Linux MSR kernel
-module, the best bet for this assignment is to use Cori@NERSC.
+module, the best bet for this assignment is to use Perlmutter@NERSC.
 
 On the VM, the codes will compile and run with likwid-perfctr in serial, but parallel
 runs will fail.
@@ -85,7 +87,7 @@ line, which is handy for scripting up the test suite.
 
 # Running the benchmarks
 
-When you run cmake, it generates three bash script files that you may use on Cori to
+When you run cmake, it generates three bash script files that you may use on Perlmutter to
 run the test battery for HW4. Some will require some modifications and customizations:
 
 ## Requesting specific  hardware performance counters
@@ -93,10 +95,10 @@ run the test battery for HW4. Some will require some modifications and customiza
 All configurations will require modification to set the specific LIKWID hardware performance
 counter group you want to collect. 
 
-The default group is PERF_COUNTER_GROUP=HBM_CACHE, which
-is documented here: https://github.com/RRZE-HPC/likwid/blob/master/groups/knl/HBM_CACHE.txt
+The default group is PERF_COUNTER_GROUP=FLOPS_DP, which
+is documented here: https://github.com/RRZE-HPC/likwid/blob/master/groups/zen3/FLOPS_DP.txt
 
-If you want to collect different hardware performance counters, replace HBM_CACHE with the
+If you want to collect different hardware performance counters, replace FLOPS_DP with the
 name of the performance counter group you want to collect. likwid-perfctr -a will give
 you a list of all the supported performance counter groups on the platform.
 
@@ -111,19 +113,6 @@ running cmake, look inside job-blas for more details.
 * job-blocked-openmp: requires 2 modifications to enable the loop over block sizes and
 to pass the block size argument in to the benckmark-blocked-omp program. After running
 cmake, look insize job-blocked-omp for more details.
-
-## Requesting a KNL interactive node for doing runs
-
-An "extra step" is required for setting up the kernel environment for running LIKWID-enabled codes to collect hardware performance counters.
-
-Modify your salloc command when requesting a KNL node by adding "--perf=likwid" as follows:
-
-salloc --nodes=1 --qos=interactive --time=01:00:00 --constraint=knl --account=m3930 --perf=likwid
-
-There may be a similar option for use with sbatch commands, but documentation is elusive.
-Suggest doing all interactive runs.
-
-You may request and use an interactive node for up to 4 hours at a time.
 
 
 #eof
