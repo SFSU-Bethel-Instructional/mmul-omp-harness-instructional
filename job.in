@@ -1,7 +1,7 @@
 #!/bin/bash -l
-#SBATCH --constraint=knl
+#SBATCH --constraint=cpu
 #SBATCH --cpus-per-task=1
-#SBATCH --qos=debug
+#SBATCH --qos=interactive
 #SBATCH --nodes=1
 #SBATCH --time=00:04:00
 #SBATCH --cpu-freq=1400000
@@ -19,9 +19,8 @@ export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
 
 # use PERF_COUNTER_GROUP to tell likwif-perfctr which perf counter group to monitor
-# the default value here, HBM_CACHE, exists on Cori's KNL nodes, but may not be present
-# on other processors
-export PERF_COUNTER_GROUP=HBM_CACHE
+# the default value here is FLOPS_DP
+export PERF_COUNTER_GROUP=FLOPS_DP
 
 # use the MARKER_FLAG variable to activate LIKWID's marker API, which will result in 
 # perf counter data being collected only in the region of code surrounded by marker start/stop
