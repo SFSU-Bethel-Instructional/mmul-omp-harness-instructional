@@ -15,52 +15,35 @@ multiply. There are some comments in dgemm-basic-omp.cpp and dgemm-blocked-omp.c
 to remind you of this fact. See dgemm-blas.cpp for example usage of the per-thread
 LIKWID Marker API, which is valid even if running a serial code.
 
-Note that cmake needs to be able to find the CBLAS package. For CSC 746 Fall 2021,
-this condition is true on Cori@NERSC and on the class VM. It is also true for some
-other platforms, but you are on your own if using a platform other than Cori@NERSC
-or the class VM.
-
-Cmake also needs to be able to find LIKWID. This condition is satisfied on Cori when
-you first load the likwid/5.2.0 module, or on the VM when you load the likwid-5.2.0
-module:  
-* module load likwid/5.2.0   # on cori  
-* module load likwid-5.2.0   # on the VM
-
-Cori@NERSC update 9/27/2022:
-
-Prior to running the module load command, please manually modify your MODULEPATH environment variable as follows
-
-   bash users:
-	% export MODULEPATH=/project/projectdirs/m3930/modulefiles:$MODULEPATH
-
-	 csh users
-	% setenv MODULEPATH /project/projectdirs/m3930/modulefiles:$MODULEPATH
+While it is possible to compile and run codes without explicitly making calls to LIKWID's
+Marker API, doing so will result in obtaining performance counter data via likwid-perfctr 
+for the entire application rather than just your MMUL.
 
 
 # Build instructions - general
 
 After downloading, cd into the main source directly, then:
 
-% mkdir build  
-% cd build  
-% cmake ../  -Wno-dev
+    mkdir build  
+    cd build  
+    cmake ../  -Wno-dev
 
-When building on Cori, make sure you are on a KNL node when doing the compilation. The
-Cori login nodes are *not* KNL nodes, the Cori login nodes have Intel Xeon E5-2698
-processors, not the Intel Xeon Phi 7250 processors.  The simplest way to do this is
-grab an interactive KNL node:
-salloc --nodes 1 --qos interactive --time 01:00:00 --constraint knl --account m3930
+This type of build will NOT include LIKWID, and you will probably see information in the cmake
+output about LIKWID not being found. The code should compile and run but will not make use of 
+LIKWID's Marker API.
 
-# Platforms
+# Configuring to use LIKWID on the VM
 
-Due to the dependency on LIKWID and LIKWID's dependency on the Linux MSR kernel
-module, the best bet for this assignment is to use Cori@NERSC.
+Cmake also needs to be able to find LIKWID. This condition is satisfied on the VM 
+when you load the likwid-5.2.2 module:  
 
-On the VM, the codes will compile and run with likwid-perfctr in serial, but parallel
-runs will fail.
+    module load likwid-5.2.2   # on the VM
 
-Other Linux platforms are possible, but you are on your own to get LIKWID installed,
-built, and working.
+# Configufing to use LIKWID on Perlmutter
+
+As of the time of this writing, 3 Oct 2023, LIKWID on Perlmutter is broken. NERSC consultants have
+been engaged and hopefully we will have a solution soon.
+
 
 # Adding your code
 
@@ -90,8 +73,12 @@ run the test battery for HW4. Some will require some modifications and customiza
 
 ## Requesting specific  hardware performance counters
 
+**NOTE: 3 Oct 2023:  This section is presently out of date. Once LIKWID is working again
+on Perlmutter, this section will be updated. **
+
 All configurations will require modification to set the specific LIKWID hardware performance
 counter group you want to collect. 
+
 
 The default group is PERF_COUNTER_GROUP=HBM_CACHE, which
 is documented here: https://github.com/RRZE-HPC/likwid/blob/master/groups/knl/HBM_CACHE.txt
@@ -117,6 +104,9 @@ cmake, look insize job-blocked-omp for more details.
 An "extra step" is required for setting up the kernel environment for running LIKWID-enabled codes to collect hardware performance counters.
 
 Modify your salloc command when requesting a KNL node by adding "--perf=likwid" as follows:
+
+**Note 3 Oct 2023: the following salloc command is out of date. It will be updated once
+LIKWID is working again on Perlmutter**
 
 salloc --nodes=1 --qos=interactive --time=01:00:00 --constraint=knl --account=m3930 --perf=likwid
 
