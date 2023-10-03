@@ -41,8 +41,8 @@ when you load the likwid-5.2.2 module:
 
 # Configufing to use LIKWID on Perlmutter
 
-As of the time of this writing, 3 Oct 2023, LIKWID on Perlmutter is broken. NERSC consultants have
-been engaged and hopefully we will have a solution soon.
+ **Note: As of the time of this writing, 3 Oct 2023, LIKWID on Perlmutter is broken. NERSC consultants have
+been engaged and hopefully we will have a solution soon.**
 
 
 # Adding your code
@@ -73,7 +73,7 @@ run the test battery for HW4. Some will require some modifications and customiza
 
 ## Requesting specific  hardware performance counters
 
-**NOTE: 3 Oct 2023:  This section is presently out of date. Once LIKWID is working again
+  **NOTE: 3 Oct 2023:  This section is presently out of date. Once LIKWID is working again
 on Perlmutter, this section will be updated. **
 
 All configurations will require modification to set the specific LIKWID hardware performance
@@ -105,7 +105,7 @@ An "extra step" is required for setting up the kernel environment for running LI
 
 Modify your salloc command when requesting a KNL node by adding "--perf=likwid" as follows:
 
-**Note 3 Oct 2023: the following salloc command is out of date. It will be updated once
+ **Note 3 Oct 2023: the following salloc command is out of date. It will be updated once
 LIKWID is working again on Perlmutter**
 
 salloc --nodes=1 --qos=interactive --time=01:00:00 --constraint=knl --account=m3930 --perf=likwid
