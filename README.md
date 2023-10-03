@@ -74,7 +74,7 @@ run the test battery for HW4. Some will require some modifications and customiza
 ## Requesting specific  hardware performance counters
 
   **NOTE: 3 Oct 2023:  This section is presently out of date. Once LIKWID is working again
-on Perlmutter, this section will be updated. **
+on Perlmutter, this section will be updated.**
 
 All configurations will require modification to set the specific LIKWID hardware performance
 counter group you want to collect. 
