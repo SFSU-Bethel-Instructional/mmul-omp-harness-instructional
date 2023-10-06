@@ -1,13 +1,15 @@
 #!/bin/bash -l
-#SBATCH --constraint=knl
+#SBATCH --constraint=cpu
 #SBATCH --cpus-per-task=1
 #SBATCH --qos=debug
 #SBATCH --nodes=1
-#SBATCH --time=00:04:00
-#SBATCH --cpu-freq=1400000
+#SBATCH --time=00:05:00
 #SBATCH --job-name=job-@BENCHMARK@
 #SBATCH --output=job-@BENCHMARK@.o%j
 #SBATCH --error=job-@BENCHMARK@.e%j
+
+# turn off OMP_NUM_THREADS as it doesn't play nicely with likwid-perfctr on Perlmutter
+unset OMP_NUM_THREADS
 
 # set some openmp variables: 
 # OMP_PLACES=threads maps OpenMP threads to hardware threads
@@ -19,9 +21,8 @@ export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
 
 # use PERF_COUNTER_GROUP to tell likwif-perfctr which perf counter group to monitor
-# the default value here, HBM_CACHE, exists on Cori's KNL nodes, but may not be present
-# on other processors
-export PERF_COUNTER_GROUP=HBM_CACHE
+# the default here, FLOPS_DP, counts the number of double-precisions FLOPS
+export PERF_COUNTER_GROUP=FLOPS_DP
 
 # use the MARKER_FLAG variable to activate LIKWID's marker API, which will result in 
 # perf counter data being collected only in the region of code surrounded by marker start/stop
@@ -60,8 +61,12 @@ for N in 128 512 2048 # loop over problem sizes
          let maxcore=$t-1
 
 # if doing the blocked version, be sure to add -B $B to the following two lines
-         echo srun -n 1 likwid-perfctr $MARKER_FLAG -g $PERF_COUNTER_GROUP -C N:0-$maxcore ./benchmark-@BENCHMARK@ -N $N 
-         srun -n 1 likwid-perfctr $MARKER_FLAG -g $PERF_COUNTER_GROUP -C N:0-$maxcore ./benchmark-@BENCHMARK@ -N $N 
+
+# 6 oct 2023, wes. srun doesn't play nicely with likwid-perfctr on Perlmutter. 
+#         echo srun -n 1 likwid-perfctr $MARKER_FLAG -g $PERF_COUNTER_GROUP -C N:0-$maxcore ./benchmark-@BENCHMARK@ -N $N 
+#         srun -n 1 likwid-perfctr $MARKER_FLAG -g $PERF_COUNTER_GROUP -C N:0-$maxcore ./benchmark-@BENCHMARK@ -N $N 
+         echo likwid-perfctr $MARKER_FLAG -g $PERF_COUNTER_GROUP -C N:0-$maxcore ./benchmark-@BENCHMARK@ -N $N 
+         likwid-perfctr $MARKER_FLAG -g $PERF_COUNTER_GROUP -C N:0-$maxcore ./benchmark-@BENCHMARK@ -N $N 
 
          done # iterate over concurrency level
 #   done # iterate over block size, uncomment me if doing a loop over blocks
