@@ -39,11 +39,28 @@ when you load the likwid-5.2.2 module:
 
     module load likwid-5.2.2   # on the VM
 
-# Configufing to use LIKWID on Perlmutter
+# Configuring to use LIKWID on Perlmutter
 
- **Note: As of the time of this writing, 3 Oct 2023, LIKWID on Perlmutter is broken. NERSC consultants have
-been engaged and hopefully we will have a solution soon.**
+As of the time of this writing (5 Oct 2023), please follow this sequence of steps exactly to use LIKWID
+on perlmutter.
 
+First, log into a Perlmutter login node.
+
+Then, without making any adjustments in the default environment, make your way to a compute node:
+
+    salloc --nodes 1 --qos interactive --time 00:30:00 --constraint cpu --account=m3930  --perf=generic
+
+Next, once you land on the compute node, execute the following commands to set up the environment for using LIKWID:
+
+    module load e4s/23.05
+    spack env activate gcc
+    spack load likwid   # note: this command may take up to 30 seconds to execute
+
+Then, you may run likwid commands, e.g likwid-topology, likwid-perfctr.
+
+Yes, you need to go through this sequence each time you want to use LIKWID. It does not seem possible to
+first set up your environment once on a login node then to hop onto a CPU node and just start running
+with LIKWID. Perhaps this situation will change in the future.
 
 # Adding your code
 
@@ -73,17 +90,15 @@ run the test battery for HW4. Some will require some modifications and customiza
 
 ## Requesting specific  hardware performance counters
 
-  **NOTE: 3 Oct 2023:  This section is presently out of date. Once LIKWID is working again
-on Perlmutter, this section will be updated.**
 
 All configurations will require modification to set the specific LIKWID hardware performance
 counter group you want to collect. 
 
 
-The default group is PERF_COUNTER_GROUP=HBM_CACHE, which
-is documented here: https://github.com/RRZE-HPC/likwid/blob/master/groups/knl/HBM_CACHE.txt
+The default group is PERF_COUNTER_GROUP=FLOPS_DP which
+is documented here: https://github.com/RRZE-HPC/likwid/blob/master/groups/zen3/FLOPS_DP.txt
 
-If you want to collect different hardware performance counters, replace HBM_CACHE with the
+If you want to collect different hardware performance counters, replace FLOPS_DP with the
 name of the performance counter group you want to collect. likwid-perfctr -a will give
 you a list of all the supported performance counter groups on the platform.
 
